@@ -7,12 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="117dp"
-        android:layout_height="69dp"
-        android:text="Button"
-        tools:ignore="MissingConstraints" />
+
 
     <androidx.camera.view.PreviewView
         android:id="@+id/activity_main_previewView"
