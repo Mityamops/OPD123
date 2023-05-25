@@ -44,7 +44,7 @@ public class SecondPage extends AppCompatActivity {
         Code.setText(name);
 
         Date currentTime = Calendar.getInstance().getTime();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String strDate = dateFormat.format(currentTime);
 
         TextView Data = findViewById(R.id.Data);
