@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         previewView = findViewById(R.id.activity_main_previewView);
 
 
-
-
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         requestCamera();
     }

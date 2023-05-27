@@ -13,6 +13,10 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,6 +30,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+
+import com.learntodroid.androidqrcodescanner.RetrieveFeedTask;
 
 public class SecondPage extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
@@ -94,6 +100,11 @@ public class SecondPage extends AppCompatActivity {
                                                             wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
 
                                                     Whether.setText(result);
+
+                                                    new RetrieveFeedTask().execute("http://78.24.223.131:8080/"+result);
+
+
+
                                                 } catch (JSONException e) {
                                                     throw new RuntimeException(e);
                                                 }
