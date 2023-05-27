@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageCapture;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -27,26 +28,48 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
+public class Photo_activity extends AppCompatActivity {
+
     private static final int PERMISSION_REQUEST_CAMERA = 0;
 
     private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
 
-    private String qrCode;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_photo);
+        previewView = findViewById(R.id.Photo_main_previewView);
 
 
+    Button button=findViewById(R.id.button4);
 
-        previewView = findViewById(R.id.activity_main_previewView);
+        /*  ImageCapture imageCapture = new ImageCapture.Builder().setTargetRotation(view.getDisplay().getRotation()).build();
 
-
-
+        button.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(new File(...)).build();
+                        imageCapture.takePicture(outputFileOptions, cameraExecutor,
+                                new ImageCapture.OnImageSavedCallback() {
+                                    @Override
+                                    public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
+                                        // insert your code here.
+                                    }
+                                    @Override
+                                    public void onError(ImageCaptureException error) {
+                                        // insert your code here.
+                                    }
+                                }
+                        );
+                    }
+                }
+        );*/
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         requestCamera();
@@ -58,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             startCamera();
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                ActivityCompat.requestPermissions(Photo_activity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
             }
@@ -99,35 +122,9 @@ public class MainActivity extends AppCompatActivity {
 
         preview.setSurfaceProvider(previewView.createSurfaceProvider());
 
-        final boolean[] flag = {false};
-        ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder()
-                        .setTargetResolution(new Size(1280, 720))
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
 
-        imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new QRCodeImageAnalyzer(new QRCodeFoundListener() {
-            @Override
-            public void onQRCodeFound(String _qrCode) {
-                qrCode = _qrCode;
 
-                if(!flag[0]){
-                Intent intent=new Intent(MainActivity.this,SecondPage.class);
-                intent.putExtra("qr",_qrCode);
-                startActivity(intent);
-
-                flag[0] =true;
-                finish();
-                }
-            }
-
-            @Override
-            public void qrCodeNotFound() {
-            }
-
-        }));
-
-        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
+       // Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageCapture,preview);
 
     }
 

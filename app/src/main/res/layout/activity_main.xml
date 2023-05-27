@@ -19,13 +19,5 @@
 
     </androidx.camera.view.PreviewView>
 
-    <Button
-        android:id="@+id/activity_main_qrCodeFoundButton"
-        android:layout_width="179dp"
-        android:layout_height="62dp"
-        android:text="QR Code Found"
-        app:layout_constraintBottom_toBottomOf="@+id/activity_main_previewView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

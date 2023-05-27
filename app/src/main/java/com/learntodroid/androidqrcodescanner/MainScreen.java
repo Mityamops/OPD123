@@ -16,12 +16,21 @@ public class MainScreen extends AppCompatActivity {
 
 
         Button button=findViewById(R.id.button);
-
+        Button button_test=findViewById(R.id.button_test);
         button.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent=new Intent(MainScreen.this,MainActivity.class);
+                        startActivity(intent);
+                    }
+                }
+        );
+        button_test.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent=new Intent(MainScreen.this,Photo_activity.class);
                         startActivity(intent);
                     }
                 }
