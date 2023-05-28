@@ -45,7 +45,7 @@ public class Photo_activity extends AppCompatActivity {
 
 
 private ImageCapture imageCapture;
-
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +53,55 @@ private ImageCapture imageCapture;
         setContentView(R.layout.activity_photo);
         previewView = findViewById(R.id.Photo_main_previewView);
 
-
+         imageView=findViewById(R.id.imageView);
         Button button=findViewById(R.id.button4);
 
-        button.setOnClickListener(new View.OnClickListener() {    @Override
-        public void onClick(View v) {        captureImage();
-        }});
+        Button button_to_back=findViewById(R.id.button2);
+        Button button_to_next=findViewById(R.id.button3);
+        button_to_back.setVisibility(View.INVISIBLE);
+        button_to_next.setVisibility(View.INVISIBLE);
+
+        button.setOnClickListener(new View.OnClickListener() {
+          @Override
+          public void onClick(View v) {
+                  captureImage();
+                  button.setVisibility(View.INVISIBLE);
+                  button_to_back.setVisibility(View.VISIBLE);
+                  button_to_next.setVisibility(View.VISIBLE);
+              }
+          });
+
+        button_to_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                button.setVisibility(View.VISIBLE);
+                button_to_back.setVisibility(View.INVISIBLE);
+                button_to_next.setVisibility(View.INVISIBLE);
+                imageView.setImageResource(0);
+            }
+        });
+
+        button_to_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                button.setVisibility(View.VISIBLE);
+                button_to_back.setVisibility(View.INVISIBLE);
+                button_to_next.setVisibility(View.INVISIBLE);
+                imageView.setImageResource(0);
+
+
+               /* private void captureImage() {    File file = new File(getExternalMediaDirs()[0], "photo.jpg");
+                    ImageCapture.OutputFileOptions outputFileOptions =new ImageCapture.OutputFileOptions.Builder(file).build();
+                    imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(this),new  ImageCapture.OnImageSavedCallback() {
+                        @Override                public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            Toast.makeText(Photo_activity.this, "Image saved to " + file.getAbsolutePath(),Toast.LENGTH_SHORT).show();
+                        }
+                        @Override                public void onError(@NonNull ImageCaptureException exception) {
+                            Toast.makeText(Photo_activity.this, "Error capturing image " + exception.getMessage(),Toast.LENGTH_SHORT).show();
+                        }            });
+                }*/
+            }
+        });
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         requestCamera();
@@ -103,7 +146,12 @@ private ImageCapture imageCapture;
 
 
     private void captureImage() {
-        ImageView imageView=findViewById(R.id.imageView);
+
+        int displayHeight = getWindowManager().getDefaultDisplay().getHeight();
+        int displayWidth = getWindowManager().getDefaultDisplay().getWidth();
+        imageView.getLayoutParams().height=displayHeight+300;
+        imageView.getLayoutParams().width=displayWidth+500;
+
 
         imageCapture.takePicture(ContextCompat.getMainExecutor(this),
                 new ImageCapture.OnImageCapturedCallback() {
@@ -114,6 +162,8 @@ private ImageCapture imageCapture;
                         Matrix matrix = new Matrix();
                         matrix.postRotate(90);
                         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),        bitmap.getHeight(), matrix, true);
+
+
                         imageView.setImageBitmap(rotatedBitmap);
                         Toast.makeText(Photo_activity.this, "Image captured", Toast.LENGTH_SHORT).show();
                         image.close();

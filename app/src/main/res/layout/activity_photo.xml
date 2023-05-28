@@ -14,7 +14,11 @@
         tools:layout_editor_absoluteY="0dp">
 
 
+
+
     </androidx.camera.view.PreviewView>
+
+    <!--  396 732 -->
 
     <ImageView
         android:id="@+id/imageView"
@@ -36,4 +40,21 @@
         app:layout_constraintStart_toStartOf="parent"
          />
 
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="сделать еще фото"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/button4"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="отправить это фото"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button4" />
 </androidx.constraintlayout.widget.ConstraintLayout>

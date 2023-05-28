@@ -4,11 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -44,10 +48,21 @@ public class SecondPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second_page);
 
+        Button button=findViewById(R.id.button5);
+        button.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent=new Intent(SecondPage.this,Photo_activity.class);
+                        startActivity(intent);
+                    }
+                }
+        );
+
         Bundle arguments = getIntent().getExtras();
-        String name = arguments.get("qr").toString();
+        String qr_code = arguments.get("qr").toString();
         TextView Code = findViewById(R.id.Code);
-        Code.setText(name);
+        Code.setText(qr_code);
 
         Date currentTime = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -63,10 +78,23 @@ public class SecondPage extends AppCompatActivity {
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
+        String send_qr = "http://78.24.223.131:8080/req/"+qr_code;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, send_qr,        new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {                // Display the first 500 characters of the response string.
+                Whether.setText("Response is: " + response.substring(0,500));            }
+        }, new Response.ErrorListener() {    @Override
+        public void onErrorResponse(VolleyError error) {        Whether.setText("That didn't work!");
+        }});
+        requestQueue.add(stringRequest);
+
+
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        } else {
+        }
+        else {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -95,13 +123,12 @@ public class SecondPage extends AppCompatActivity {
                                                     String wind_dir = data.getString("wind_dir");
                                                     String pressure_mb = String.valueOf(data.getDouble("pressure_mb"));  // milli bar
 
+                                                    String result_for_device = "Температура: "+temp_c+", \nСостояние: "+pogoda+", \nСкорость ветра: "+        wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
+                                                    Whether.setText(result_for_device);
+                                                    String result_for_server = "temp="+temp_c+
+                                                            "&wind_speed="+wind_speed+        "pressure="+Double.valueOf(pressure_mb)*1000+
+                                                            "&"+geopos+"&date="+strDate;
 
-                                                    String result = "Температура: "+temp_c+", \nСостояние: "+pogoda+", \nСкорость ветра: "+
-                                                            wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
-
-                                                    Whether.setText(result);
-
-                                                    new RetrieveFeedTask().execute("http://78.24.223.131:8080/"+result);
 
 
 
@@ -118,12 +145,11 @@ public class SecondPage extends AppCompatActivity {
                                         });
 
                                 requestQueue.add(jsonArrayRequest);
+
+
                             }
                         }
                     });
         }
-
-
-
     }
 }
