@@ -6,6 +6,8 @@ import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -16,16 +18,22 @@ import androidx.lifecycle.LifecycleOwner;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 
 public class Photo_activity extends AppCompatActivity {
@@ -36,7 +44,7 @@ public class Photo_activity extends AppCompatActivity {
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
 
-
+private ImageCapture imageCapture;
 
 
     @Override
@@ -46,34 +54,17 @@ public class Photo_activity extends AppCompatActivity {
         previewView = findViewById(R.id.Photo_main_previewView);
 
 
-    Button button=findViewById(R.id.button4);
+        Button button=findViewById(R.id.button4);
 
-        /*  ImageCapture imageCapture = new ImageCapture.Builder().setTargetRotation(view.getDisplay().getRotation()).build();
-
-        button.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(new File(...)).build();
-                        imageCapture.takePicture(outputFileOptions, cameraExecutor,
-                                new ImageCapture.OnImageSavedCallback() {
-                                    @Override
-                                    public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-                                        // insert your code here.
-                                    }
-                                    @Override
-                                    public void onError(ImageCaptureException error) {
-                                        // insert your code here.
-                                    }
-                                }
-                        );
-                    }
-                }
-        );*/
+        button.setOnClickListener(new View.OnClickListener() {    @Override
+        public void onClick(View v) {        captureImage();
+        }});
 
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         requestCamera();
     }
+
+
 
 
     private void requestCamera() {
@@ -110,6 +101,32 @@ public class Photo_activity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+
+    private void captureImage() {
+        ImageView imageView=findViewById(R.id.imageView);
+
+        imageCapture.takePicture(ContextCompat.getMainExecutor(this),
+                new ImageCapture.OnImageCapturedCallback() {
+                    @Override
+                    public void onCaptureSuccess(@NonNull ImageProxy image) {
+                        ByteBuffer buffer = image.getPlanes()[0].getBuffer();byte[] data = new byte[buffer.remaining()];
+                        buffer.get(data);Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(90);
+                        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),        bitmap.getHeight(), matrix, true);
+                        imageView.setImageBitmap(rotatedBitmap);
+                        Toast.makeText(Photo_activity.this, "Image captured", Toast.LENGTH_SHORT).show();
+                        image.close();
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        Toast.makeText(Photo_activity.this, "Error capturing image " + exception.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     private void bindCameraPreview(@NonNull ProcessCameraProvider cameraProvider) {
         previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.SURFACE_VIEW);
 
@@ -120,13 +137,12 @@ public class Photo_activity extends AppCompatActivity {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
+
+
         preview.setSurfaceProvider(previewView.createSurfaceProvider());
+        imageCapture = new ImageCapture.Builder().build();
+        cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture);
 
-
-
-       // Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageCapture,preview);
 
     }
-
-
 }
