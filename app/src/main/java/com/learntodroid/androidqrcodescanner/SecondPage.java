@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -95,25 +96,26 @@ public class SecondPage extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
         String send_qr = "http://78.24.223.131:8080/req/"+qr_code;
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, send_qr,        new Response.Listener<String>() {
+        NetworkResponseRequest request = new NetworkResponseRequest(Request.Method.GET, send_qr,
+                new Response.Listener<NetworkResponse>() {
+                    @Override
+                    public void onResponse(NetworkResponse response) {
+                       // Checkqr.setText(response.statusCode);
+                    }
+                }, new Response.ErrorListener() {
             @Override
-            public void onResponse(String response) {                // Display the first 500 characters of the response string.
-                Checkqr.setText("Response is: " + response);
+            public void onErrorResponse(VolleyError error) {
+                Checkqr.setText("Error");
             }
-        }, new Response.ErrorListener() {
-            @Override
-        public void onErrorResponse(VolleyError error) {
-            Checkqr.setText("That didn't work!");
-        }});
-        requestQueue.add(stringRequest);
+        }
+        );
 
-
-
+        if(Checkqr.getText()=="200")
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         }
-        else {
+  /*  не открывать*/      else {
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -169,10 +171,6 @@ public class SecondPage extends AppCompatActivity {
                                                                 }
                                                             }
                                                     );
-
-
-
-
 
                                                 } catch (JSONException e) {
                                                     throw new RuntimeException(e);
