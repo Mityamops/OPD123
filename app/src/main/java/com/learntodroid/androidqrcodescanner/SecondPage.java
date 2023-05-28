@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -17,6 +19,8 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -43,6 +47,7 @@ public class SecondPage extends AppCompatActivity {
     String url;
 
 
+    @SuppressLint("WrongThread")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,9 +60,15 @@ public class SecondPage extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent intent=new Intent(SecondPage.this,Photo_activity.class);
                         startActivity(intent);
+
+
+
                     }
                 }
         );
+
+
+
 
         Bundle arguments = getIntent().getExtras();
         String qr_code = arguments.get("qr").toString();

@@ -1,5 +1,6 @@
 package com.learntodroid.androidqrcodescanner;
 
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.Camera;
@@ -21,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
@@ -33,6 +35,8 @@ import android.widget.Toast;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 
@@ -84,22 +88,23 @@ private ImageCapture imageCapture;
         button_to_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                button.setVisibility(View.VISIBLE);
-                button_to_back.setVisibility(View.INVISIBLE);
-                button_to_next.setVisibility(View.INVISIBLE);
-                imageView.setImageResource(0);
 
 
-               /* private void captureImage() {    File file = new File(getExternalMediaDirs()[0], "photo.jpg");
-                    ImageCapture.OutputFileOptions outputFileOptions =new ImageCapture.OutputFileOptions.Builder(file).build();
-                    imageCapture.takePicture(outputFileOptions, ContextCompat.getMainExecutor(this),new  ImageCapture.OnImageSavedCallback() {
-                        @Override                public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                            Toast.makeText(Photo_activity.this, "Image saved to " + file.getAbsolutePath(),Toast.LENGTH_SHORT).show();
-                        }
-                        @Override                public void onError(@NonNull ImageCaptureException exception) {
-                            Toast.makeText(Photo_activity.this, "Error capturing image " + exception.getMessage(),Toast.LENGTH_SHORT).show();
-                        }            });
-                }*/
+                imageView.buildDrawingCache();
+                Bitmap bitmap=((BitmapDrawable)imageView.getDrawable()).getBitmap();
+                Intent intent = new Intent(Photo_activity.this,SecondPage.class);
+
+                try (FileOutputStream out = new FileOutputStream( new File(getExternalMediaDirs()[0], "photo.jpg"))) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out); // bmp is your Bitmap instance
+                    // PNG is a lossless format, the compression factor (100) is ignored
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                finish();
+
             }
         });
 
