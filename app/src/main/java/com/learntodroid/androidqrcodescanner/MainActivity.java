@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
-        preview.setSurfaceProvider(previewView.createSurfaceProvider());
+        preview.setSurfaceProvider( previewView.createSurfaceProvider());
 
         final boolean[] flag = {false};
         ImageAnalysis imageAnalysis =
@@ -114,8 +114,8 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("qr",_qrCode);
                 startActivity(intent);
 
-                flag[0] =true;
-                finish();
+                    flag[0] =true;
+                    finish();
                 }
             }
 

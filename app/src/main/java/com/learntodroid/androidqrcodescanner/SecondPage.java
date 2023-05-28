@@ -68,6 +68,8 @@ public class SecondPage extends AppCompatActivity {
         );
 
 
+        Button SendInfo=findViewById(R.id.SendInfo);
+
 
 
         Bundle arguments = getIntent().getExtras();
@@ -85,6 +87,9 @@ public class SecondPage extends AppCompatActivity {
         TextView GeoPos = findViewById(R.id.GeoPos);
         GeoPos.setText("No coord");
 
+        TextView Checkqr = findViewById(R.id.checkqr);
+
+
         TextView Whether = findViewById(R.id.whether);
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -93,9 +98,12 @@ public class SecondPage extends AppCompatActivity {
         StringRequest stringRequest = new StringRequest(Request.Method.GET, send_qr,        new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {                // Display the first 500 characters of the response string.
-                Whether.setText("Response is: " + response.substring(0,500));            }
-        }, new Response.ErrorListener() {    @Override
-        public void onErrorResponse(VolleyError error) {        Whether.setText("That didn't work!");
+                Checkqr.setText("Response is: " + response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+        public void onErrorResponse(VolleyError error) {
+            Checkqr.setText("That didn't work!");
         }});
         requestQueue.add(stringRequest);
 
@@ -139,6 +147,29 @@ public class SecondPage extends AppCompatActivity {
                                                     String result_for_server = "temp="+temp_c+
                                                             "&wind_speed="+wind_speed+        "pressure="+Double.valueOf(pressure_mb)*1000+
                                                             "&"+geopos+"&date="+strDate;
+
+
+                                                    SendInfo.setOnClickListener(
+                                                            new View.OnClickListener() {
+                                                                @Override
+                                                                public void onClick(View v) {
+
+                                                                    StringRequest Request_for_server = new StringRequest(Request.Method.GET, result_for_server,        new Response.Listener<String>() {
+                                                                        @Override
+                                                                        public void onResponse(String response) {                // Display the first 500 characters of the response string.
+                                                                            Checkqr.setText("Response is: " + response.substring(0,500));
+                                                                        }
+                                                                    }, new Response.ErrorListener() {    @Override
+                                                                    public void onErrorResponse(VolleyError error) {
+                                                                        Checkqr.setText("That didn't work!");
+                                                                    }});
+                                                                    requestQueue.add(Request_for_server);
+
+
+                                                                }
+                                                            }
+                                                    );
+
 
 
 
