@@ -115,7 +115,7 @@ public class SecondPage extends AppCompatActivity {
                                             public void onSuccess(Location location) {
                                                 // Got last known location. In some rare situations this can be null.
                                                 if (location != null) {
-                                                    String geopos = "x:" + location.getLatitude() + ",y:" + location.getLongitude();
+                                                    String geopos =  location.getLatitude() +"," + location.getLongitude();
                                                     GeoPos.setText(geopos);
 
 
@@ -138,10 +138,11 @@ public class SecondPage extends AppCompatActivity {
 
                                                                         String result_for_device = "Температура: "+temp_c+", \nСостояние: "+pogoda+", \nСкорость ветра: "+        wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
                                                                         Whether.setText(result_for_device);
-                                                                        String result_for_server = "temp="+temp_c+
+                                                                        /*String result_for_server = "temp="+temp_c+
                                                                                 "&wind_speed="+wind_speed+"&pressure="+String.valueOf(Double.valueOf(pressure_mb)*1000)+
-                                                                                "&"+geopos+"&date="+strDate;
+                                                                                "&"+geopos+"&date="+strDate;*/
 
+                                                                        String result_for_server = temp_c+"&"+geopos;
 
                                                                         SendInfo.setOnClickListener(
                                                                                 new View.OnClickListener() {
