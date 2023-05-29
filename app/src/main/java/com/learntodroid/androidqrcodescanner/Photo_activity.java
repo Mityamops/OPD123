@@ -169,7 +169,7 @@ private ImageCapture imageCapture;
                     e.printStackTrace();
                 }
 
-                uploadBitmap(bitmap);
+                //uploadBitmap(bitmap);
 
 
                 finish();

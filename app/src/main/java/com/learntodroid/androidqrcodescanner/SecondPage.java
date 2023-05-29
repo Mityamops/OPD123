@@ -94,13 +94,112 @@ public class SecondPage extends AppCompatActivity {
         TextView Whether = findViewById(R.id.whether);
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-
+        final int[] Check_qr_status = new int[1];
         String send_qr = "http://78.24.223.131:8080/req/"+qr_code;
         NetworkResponseRequest request = new NetworkResponseRequest(Request.Method.GET, send_qr,
                 new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
-                       // Checkqr.setText(response.statusCode);
+                        Check_qr_status[0] =response.statusCode;
+                        //Checkqr.setText(String.valueOf(response.statusCode));
+                        if(Check_qr_status[0]==200){
+                            Checkqr.setText("Хороший код!:)");
+                            if (ActivityCompat.checkSelfPermission(SecondPage.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(SecondPage.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                            }
+                            /*  не открывать НИКОГДА*/      else {
+                                fusedLocationClient = LocationServices.getFusedLocationProviderClient(SecondPage.this);
+                                fusedLocationClient.getLastLocation()
+                                        .addOnSuccessListener(SecondPage.this, new OnSuccessListener<Location>() {
+                                            @Override
+                                            public void onSuccess(Location location) {
+                                                // Got last known location. In some rare situations this can be null.
+                                                if (location != null) {
+                                                    String geopos = "x:" + location.getLatitude() + ",y:" + location.getLongitude();
+                                                    GeoPos.setText(geopos);
+
+
+                                                    url = "https://api.weatherapi.com/v1/current.json?q="+location.getLatitude()+","+location.getLongitude()+"&key=52fb3618a2644f1b9d6115703232505";
+
+                                                    JsonObjectRequest jsonArrayRequest = new JsonObjectRequest(
+                                                            Request.Method.GET, url, null,
+                                                            new Response.Listener<JSONObject>() {
+                                                                @Override
+                                                                public void onResponse(JSONObject response)
+                                                                {
+                                                                    try {
+                                                                        JSONObject data = response.getJSONObject("current");
+                                                                        String temp_c = String.valueOf(data.getDouble("temp_c"));
+                                                                        JSONObject condition = data.getJSONObject("condition");
+                                                                        String pogoda = condition.getString("text");
+                                                                        String wind_speed = String.valueOf(data.getDouble("wind_kph"));
+                                                                        String wind_dir = data.getString("wind_dir");
+                                                                        String pressure_mb = String.valueOf(data.getDouble("pressure_mb"));  // milli bar
+
+                                                                        String result_for_device = "Температура: "+temp_c+", \nСостояние: "+pogoda+", \nСкорость ветра: "+        wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
+                                                                        Whether.setText(result_for_device);
+                                                                        String result_for_server = "temp="+temp_c+
+                                                                                "&wind_speed="+wind_speed+"&pressure="+String.valueOf(Double.valueOf(pressure_mb)*1000)+
+                                                                                "&"+geopos+"&date="+strDate;
+
+
+                                                                        SendInfo.setOnClickListener(
+                                                                                new View.OnClickListener() {
+                                                                                    @Override
+                                                                                    public void onClick(View v) {
+
+                                                                                        StringRequest Request_for_server = new StringRequest(Request.Method.GET, "http://78.24.223.131:8080/req/"+qr_code+"/"+result_for_server,        new Response.Listener<String>() {
+                                                                                            @Override
+                                                                                            public void onResponse(String response) {                // Display the first 500 characters of the response string.
+                                                                                                Checkqr.setText("Response is: " + response);
+                                                                                            }
+                                                                                        }, new Response.ErrorListener() {    @Override
+                                                                                        public void onErrorResponse(VolleyError error) {
+                                                                                            Checkqr.setText("That didn't work!");
+                                                                                        }});
+                                                                                        requestQueue.add(Request_for_server);
+
+
+                                                                                    }
+                                                                                }
+                                                                        );
+
+                                                                    } catch (JSONException e) {
+                                                                        throw new RuntimeException(e);
+                                                                    }
+                                                                }
+                                                            },
+                                                            new Response.ErrorListener() {
+                                                                @Override
+                                                                public void onErrorResponse(VolleyError error)
+                                                                {
+                                                                }
+                                                            });
+
+                                                    requestQueue.add(jsonArrayRequest);
+
+
+                                                }
+                                            }
+                                        });
+                            }}
+
+                        else if(Check_qr_status[0]==410){
+                            Checkqr.setText("использованный код!:(");
+
+                        }
+                        else if(Check_qr_status[0]==422){
+                            Checkqr.setText("плохой код!:(");
+
+                        }
+                        else if(Check_qr_status[0]==406){
+                            Checkqr.setText("исследование закончилось");
+
+                        }
+                        else{
+                            Checkqr.setText(String.valueOf(Check_qr_status[0]));
+
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -109,87 +208,9 @@ public class SecondPage extends AppCompatActivity {
             }
         }
         );
-
-        if(Checkqr.getText()=="200")
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        }
-  /*  не открывать*/      else {
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null) {
-                                String geopos = "x:" + location.getLatitude() + ", y:" + location.getLongitude();
-                                GeoPos.setText(geopos);
+        requestQueue.add(request);
 
 
-                                url = "https://api.weatherapi.com/v1/current.json?q="+location.getLatitude()+","+location.getLongitude()+"&key=52fb3618a2644f1b9d6115703232505";
-
-                                JsonObjectRequest jsonArrayRequest = new JsonObjectRequest(
-                                        Request.Method.GET, url, null,
-                                        new Response.Listener<JSONObject>() {
-                                            @Override
-                                            public void onResponse(JSONObject response)
-                                            {
-                                                try {
-                                                    JSONObject data = response.getJSONObject("current");
-                                                    String temp_c = String.valueOf(data.getDouble("temp_c"));
-                                                    JSONObject condition = data.getJSONObject("condition");
-                                                    String pogoda = condition.getString("text");
-                                                    String wind_speed = String.valueOf(data.getDouble("wind_kph"));
-                                                    String wind_dir = data.getString("wind_dir");
-                                                    String pressure_mb = String.valueOf(data.getDouble("pressure_mb"));  // milli bar
-
-                                                    String result_for_device = "Температура: "+temp_c+", \nСостояние: "+pogoda+", \nСкорость ветра: "+        wind_speed+", \nНаправление ветра: "+wind_dir+", \nДавление(миллибары): "+pressure_mb;
-                                                    Whether.setText(result_for_device);
-                                                    String result_for_server = "temp="+temp_c+
-                                                            "&wind_speed="+wind_speed+        "pressure="+Double.valueOf(pressure_mb)*1000+
-                                                            "&"+geopos+"&date="+strDate;
-
-
-                                                    SendInfo.setOnClickListener(
-                                                            new View.OnClickListener() {
-                                                                @Override
-                                                                public void onClick(View v) {
-
-                                                                    StringRequest Request_for_server = new StringRequest(Request.Method.GET, result_for_server,        new Response.Listener<String>() {
-                                                                        @Override
-                                                                        public void onResponse(String response) {                // Display the first 500 characters of the response string.
-                                                                            Checkqr.setText("Response is: " + response.substring(0,500));
-                                                                        }
-                                                                    }, new Response.ErrorListener() {    @Override
-                                                                    public void onErrorResponse(VolleyError error) {
-                                                                        Checkqr.setText("That didn't work!");
-                                                                    }});
-                                                                    requestQueue.add(Request_for_server);
-
-
-                                                                }
-                                                            }
-                                                    );
-
-                                                } catch (JSONException e) {
-                                                    throw new RuntimeException(e);
-                                                }
-                                            }
-                                        },
-                                        new Response.ErrorListener() {
-                                            @Override
-                                            public void onErrorResponse(VolleyError error)
-                                            {
-                                            }
-                                        });
-
-                                requestQueue.add(jsonArrayRequest);
-
-
-                            }
-                        }
-                    });
-        }
     }
+
 }
