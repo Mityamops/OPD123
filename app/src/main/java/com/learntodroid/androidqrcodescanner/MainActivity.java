@@ -1,103 +1,82 @@
 package com.learntodroid.androidqrcodescanner;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.Camera;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.PreviewView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LifecycleOwner;
-
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.concurrent.ExecutionException;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
-public class MainActivity extends AppCompatActivity {
-    private static final int PERMISSION_REQUEST_CAMERA = 0;
-
-    private PreviewView previewView;
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-
-
-    private String qrCode;
+// implements onClickListener for the onclick behaviour of button
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    Button scanBtn;
+    TextView messageText, messageFormat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // referencing and initializing
+        // the button and textviews
+        scanBtn = findViewById(R.id.scanBtn);
+        messageText = findViewById(R.id.textContent);
+        messageFormat = findViewById(R.id.textFormat);
 
+        // adding listener to the button
+        scanBtn.setOnClickListener(this);
 
-        previewView = findViewById(R.id.activity_main_previewView);
-
-
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-        requestCamera();
-    }
-
-
-    private void requestCamera() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            startCamera();
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
-            }
-        }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == PERMISSION_REQUEST_CAMERA) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera();
+    public void onClick(View v) {
+        // we need to create the object
+        // of IntentIntegrator class
+        // which is the class of QR library
+        IntentIntegrator intentIntegrator = new IntentIntegrator(this);
+        intentIntegrator.setPrompt("Scan a barcode or QR Code");
+        intentIntegrator.setOrientationLocked(true);
+        intentIntegrator.initiateScan();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        // if the intentResult is null then
+        // toast a message as "cancelled"
+        if (intentResult != null) {
+            if (intentResult.getContents() == null) {
+                Toast.makeText(getBaseContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
+                // if the intentResult is not null we'll set
+                // the content and format of scan message
+                messageText.setText(intentResult.getContents());
+                messageFormat.setText(intentResult.getFormatName());
+
+                String qrCode = intentResult.getContents();
+
+
+                Intent intent=new Intent(MainActivity.this,SecondPage.class);
+                intent.putExtra("qr",qrCode);
+                startActivity(intent);
+
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
+}
 
-    private void startCamera() {
-        cameraProviderFuture.addListener(() -> {
-            try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                bindCameraPreview(cameraProvider);
-            } catch (ExecutionException | InterruptedException e) {
-                Toast.makeText(this, "Error starting camera " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }, ContextCompat.getMainExecutor(this));
-    }
 
-    private void bindCameraPreview(@NonNull ProcessCameraProvider cameraProvider) {
-        previewView.setPreferredImplementationMode(PreviewView.ImplementationMode.SURFACE_VIEW);
 
-        Preview preview = new Preview.Builder()
-                .build();
 
-        CameraSelector cameraSelector = new CameraSelector.Builder()
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                .build();
-
-        preview.setSurfaceProvider( previewView.createSurfaceProvider());
-
-        final boolean[] flag = {false};
+       /* final boolean[] flag = {false};
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder()
                         .setTargetResolution(new Size(1280, 720))
@@ -130,4 +109,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-}
+}*/
